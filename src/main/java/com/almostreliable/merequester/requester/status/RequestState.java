@@ -4,6 +4,8 @@ import com.almostreliable.merequester.requester.CraftingPlanBudget;
 import com.almostreliable.merequester.requester.RequesterBlockEntity;
 
 import appeng.api.networking.crafting.CalculationStrategy;
+import appeng.api.networking.crafting.ICraftingSimulationRequester;
+import appeng.api.networking.security.IActionSource;
 import appeng.api.networking.ticking.TickRateModulation;
 
 public class RequestState implements StatusState {
@@ -36,7 +38,17 @@ public class RequestState implements StatusState {
 
         var future = crafting.beginCraftingCalculation(
             level,
-            owner::getActionSource,
+            new ICraftingSimulationRequester() {
+                @Override
+                public IActionSource getActionSource() {
+                    return owner.getActionSource();
+                }
+
+                @Override
+                public boolean blocksServerTick() {
+                    return false;
+                }
+            },
             key,
             amountToCraft,
             CalculationStrategy.REPORT_MISSING_ITEMS
